@@ -1,0 +1,165 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dean's Math Lab 2.0</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#090e1c;color:white;font-family:Arial,sans-serif}
+header{padding:24px;background:#121b31;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap}
+header h1{margin:0;color:#62a5ff}
+header span{color:#ffd36e}
+main{max-width:1100px;margin:auto;padding:24px}
+.hero{padding:35px;background:linear-gradient(120deg,#174c86,#54348c);border-radius:20px}
+.hero h2{font-size:36px;margin:0 0 10px}
+input{padding:14px;border-radius:10px;border:1px solid #34476a;background:#17233b;color:white;width:100%;margin:20px 0}
+nav{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:25px}
+nav button{padding:11px 15px;border:1px solid #34476a;background:#17233b;color:white;border-radius:20px;cursor:pointer}
+nav button.active,nav button:hover{background:#347bd0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px}
+.card{background:#17233b;border:1px solid #34476a;border-radius:16px;padding:20px}
+.card .emoji{font-size:48px}
+.card h3{margin:12px 0 6px}
+.card p{color:#aab9d2;font-size:13px}
+.card button{background:#347bd0;color:white;border:0;padding:10px 15px;border-radius:8px;cursor:pointer}
+#game{margin-top:25px;padding:25px;background:#17233b;border-radius:15px;display:none}
+#game button{padding:10px;background:#347bd0;color:white;border:0;border-radius:8px;margin:5px;cursor:pointer}
+footer{text-align:center;padding:30px;color:#9eacc8}
+</style>
+</head>
+<body>
+<header>
+<h1>🎮 Dean's Math Lab 2.0</h1>
+<span>👑 Owner: Cash</span>
+</header>
+<main>
+<section class="hero">
+<h2>Welcome to the Game Hub!</h2>
+<p>Find your next favorite game. Play, explore and have fun!</p>
+</section>
+
+<input id="search" placeholder="🔍 Search games..." oninput="showGames()">
+
+<nav id="categories">
+<button class="active" onclick="category('All',this)">All Games</button>
+<button onclick="category('Shooting',this)">🔥 Shooting</button>
+<button onclick="category('Racing',this)">🏎️ Racing</button>
+<button onclick="category('Sports',this)">🏈 Sports</button>
+<button onclick="category('Puzzle',this)">🧩 Puzzle</button>
+<button onclick="category('Adventure',this)">🗺️ Adventure</button>
+<button onclick="category('Magic',this)">🪄 Magic</button>
+</nav>
+
+<h2>🎯 Game Library</h2>
+<div class="grid" id="games"></div>
+<div id="game"></div>
+</main>
+<footer>Dean's Math Lab 2.0 · Made for fun and learning · Cash 👑</footer>
+
+<script>
+const list=[
+["Fortnite-style Battle","Shooting","🔫"],
+["Paint Battle","Shooting","🎨"],
+["Laser Tag","Shooting","⚡"],
+["Target Challenge","Shooting","🎯"],
+["Turbo Racing","Racing","🏎️"],
+["Car Stunts","Racing","🚗"],
+["Football Challenge","Sports","🏈"],
+["Basketball Stars","Sports","🏀"],
+["Soccer Challenge","Sports","⚽"],
+["Tic Tac Toe","Puzzle","❎"],
+["Memory Match","Puzzle","🧠"],
+["Math Sprint","Puzzle","🔢"],
+["Treasure Quest","Adventure","🗝️"],
+["Jungle Adventure","Adventure","🌴"],
+["Magic Quest","Magic","🪄"],
+["Spell Master","Magic","✨"]
+];
+
+let current="All";
+
+function category(c,b){
+current=c;
+document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
+b.classList.add("active");
+showGames();
+}
+
+function showGames(){
+let q=document.getElementById("search").value.toLowerCase();
+let filtered=list.filter(g=>
+(current==="All"||g[1]===current)&&g[0].toLowerCase().includes(q)
+);
+document.getElementById("games").innerHTML=filtered.map(g=>
+`<div class="card">
+<div class="emoji">${g[2]}</div>
+<h3>${g[0]}</h3>
+<p>${g[1]} Games</p>
+<button onclick="play('${g[0]}')">Play Game</button>
+</div>`
+).join("")||"<p>No games found.</p>";
+}
+
+function play(name){
+let box=document.getElementById("game");
+box.style.display="block";
+box.innerHTML="<h2>"+name+"</h2><p>Choose a mini-game to play!</p>";
+if(name==="Tic Tac Toe") startTic();
+else if(name==="Math Sprint") startMath();
+else box.innerHTML+="<p>This game needs a playable game file or supported game link to launch.</p>";
+box.scrollIntoView({behavior:"smooth"});
+}
+
+function startMath(){
+let answer;
+function next(){
+let a=Math.ceil(Math.random()*12),b=Math.ceil(Math.random()*12);
+answer=a+b;
+document.getElementById("question").textContent=a+" + "+b+" = ?";
+}
+document.getElementById("game").innerHTML=`
+<h2>🔢 Math Sprint</h2>
+<h3 id="question"></h3>
+<input id="answer" type="number" placeholder="Your answer">
+<button onclick="check()">Check</button>
+<p id="result"></p>`;
+next();
+window.check=function(){
+let r=document.getElementById("result");
+if(Number(document.getElementById("answer").value)===answer){
+r.textContent="Correct! 🎉";
+}else r.textContent="Try again!";
+};
+}
+
+function startTic(){
+let cells=Array(9).fill("");
+let box=document.getElementById("game");
+box.innerHTML="<h2>Tic Tac Toe ❎</h2><p id='status'>Your turn: X</p><div id='board' style='display:grid;grid-template-columns:repeat(3,70px);gap:5px'></div><button onclick='startTic()'>Restart</button>";
+function draw(){
+document.getElementById("board").innerHTML=cells.map((v,i)=>
+`<button style="height:65px;font-size:25px" onclick="move(${i})">${v}</button>`).join("");
+}
+window.move=function(i){
+if(cells[i]||checkWinner())return;
+cells[i]="X";
+if(!checkWinner()&&cells.some(x=>!x)){
+let empty=cells.map((x,i)=>x?null:i).filter(x=>x!==null);
+cells[empty[Math.floor(Math.random()*empty.length)]]="O";
+}
+draw();
+if(checkWinner())document.getElementById("status").textContent="Game over!";
+else if(cells.every(Boolean))document.getElementById("status").textContent="Draw!";
+};
+function checkWinner(){
+return [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]].some(([a,b,c])=>cells[a]&&cells[a]===cells[b]&&cells[a]===cells[c]);
+}
+window.checkWinner=checkWinner;
+draw();
+}
+showGames();
+</script>
+</body>
+</html>
